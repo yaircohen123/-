@@ -26,6 +26,8 @@
   --line:#e6e2d8;
   --muted:#6b6a63;
   --danger:#c0392b;
+  --expense:#5b6b8c;
+  --expense-dark:#44526e;
   --shadow:0 6px 20px rgba(20,30,20,.08);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -112,7 +114,9 @@ section.block{padding:26px 0;}
 .stat-box .label{font-size:13px;color:var(--muted);margin-bottom:6px;}
 .stat-box .value{font-size:24px;font-weight:900;}
 .stat-box.income .value{color:var(--green);}
+.stat-box.expense .value{color:var(--expense-dark);}
 .stat-box.obligation .value{color:var(--gold-dark);}
+.stat-box.obligation .label small{display:block;font-weight:400;font-size:11px;margin-top:2px;}
 .stat-box.given .value{color:var(--green);}
 .stat-box.balance .value{color:var(--danger);}
 .stat-box.balance.ok .value{color:var(--green);}
@@ -140,11 +144,11 @@ section.block{padding:26px 0;}
 .inspire-body.open{display:block;}
 
 /* forms */
-.forms-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
-@media (max-width:760px){.forms-grid{grid-template-columns:1fr;}}
+.forms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;}
 .entry-card h3{font-size:17px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
 .entry-card.income{border-top:4px solid var(--green);}
 .entry-card.giving{border-top:4px solid var(--gold);}
+.entry-card.expense{border-top:4px solid var(--expense);}
 .form-row{margin-bottom:14px;}
 .form-row label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500;}
 .form-row input[type=text],.form-row input[type=number],.form-row input[type=date],.form-row select{
@@ -158,6 +162,7 @@ section.block{padding:26px 0;}
 }
 .btn-income{background:var(--green);color:#fff;}
 .btn-giving{background:var(--gold);color:#1a1400;}
+.btn-expense{background:var(--expense);color:#fff;}
 .btn-secondary{background:#efefef;color:#444;}
 .btn-danger{background:var(--danger);color:#fff;}
 .btn-block{width:100%;}
@@ -171,6 +176,7 @@ tr:hover td{background:#faf9f5;}
 .tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700;}
 .tag.income{background:#e3f2e9;color:var(--green-dark);}
 .tag.giving{background:#fbf0d4;color:var(--gold-dark);}
+.tag.expense{background:#e7eaf2;color:var(--expense-dark);}
 .row-actions button{background:none;border:none;cursor:pointer;font-size:14px;padding:3px 6px;}
 .table-scroll{overflow-x:auto;}
 .empty-msg{color:var(--muted);text-align:center;padding:20px 0;}
@@ -256,7 +262,8 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
     <div class="section-title"><span class="icon">📊</span><h2>סיכום כללי</h2></div>
     <div class="stats-grid">
       <div class="stat-box income"><div class="label">סה״כ הכנסות</div><div class="value" id="statIncome">₪0</div></div>
-      <div class="stat-box obligation"><div class="label">סה״כ חובת מעשר</div><div class="value" id="statObligation">₪0</div></div>
+      <div class="stat-box expense"><div class="label">סה״כ הוצאות עסקיות</div><div class="value" id="statExpense">₪0</div></div>
+      <div class="stat-box obligation"><div class="label">סה״כ חובת מעשר<br><small style="font-weight:400;">(על הכנסה נטו)</small></div><div class="value" id="statObligation">₪0</div></div>
       <div class="stat-box given"><div class="label">סה״כ נתינה</div><div class="value" id="statGiven">₪0</div></div>
       <div class="stat-box balance" id="statBalanceBox"><div class="label" id="statBalanceLabel">נותר לתת</div><div class="value" id="statBalance">₪0</div></div>
     </div>
@@ -341,7 +348,28 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
           </div>
         </form>
       </div>
+      <div class="card entry-card expense">
+        <h3>🧾 הוצאה עסקית</h3>
+        <form id="expenseForm">
+          <div class="form-row">
+            <label>סכום ההוצאה (₪)</label>
+            <input type="number" min="0" step="0.01" required data-role="amount">
+          </div>
+          <div class="form-row date-picker" data-role="datepicker"></div>
+          <div class="form-row">
+            <label>הערה (סוג ההוצאה)</label>
+            <input type="text" placeholder="למשל: ציוד, שכירות, ספקים..." data-role="note">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-expense btn-block" data-role="submitBtn">הוסף הוצאה</button>
+          </div>
+        </form>
+      </div>
     </div>
+    <p style="margin-top:14px;font-size:13px;color:var(--muted);">
+      הוצאות עסקיות מופחתות מסך ההכנסות לפני חישוב חובת המעשר (מעשר מחושב על רווח נטו) —
+      כך שהוספת הוצאה עסקית תקטין את הסכום שנותר לכם לתת.
+    </p>
   </section>
 
   <!-- רשומות -->
@@ -351,6 +379,7 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
       <div class="filter-bar">
         <button class="chip active" data-filter="all">הכל</button>
         <button class="chip" data-filter="income">הכנסות</button>
+        <button class="chip" data-filter="expense">הוצאות</button>
         <button class="chip" data-filter="giving">נתינות</button>
       </div>
       <div class="table-scroll">
@@ -359,7 +388,7 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
           <tbody id="entriesBody"></tbody>
         </table>
       </div>
-      <div class="empty-msg" id="entriesEmpty" style="display:none;">אין עדיין רשומות. הוסיפו הכנסה או תרומה כדי להתחיל.</div>
+      <div class="empty-msg" id="entriesEmpty" style="display:none;">אין עדיין רשומות. הוסיפו הכנסה, הוצאה או תרומה כדי להתחיל.</div>
     </div>
   </section>
 
@@ -373,7 +402,7 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
     <div class="card report-panel active" id="monthlyPanel">
       <div class="table-scroll">
         <table>
-          <thead><tr><th>חודש</th><th>הכנסות</th><th>חובת מעשר</th><th>נתינה</th><th>יתרה מצטברת</th></tr></thead>
+          <thead><tr><th>חודש</th><th>הכנסות</th><th>הוצאות</th><th>נטו</th><th>חובת מעשר</th><th>נתינה</th><th>יתרה מצטברת</th></tr></thead>
           <tbody id="monthlyBody"></tbody>
         </table>
       </div>
@@ -384,7 +413,7 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
     <div class="card report-panel" id="yearlyPanel">
       <div class="table-scroll">
         <table>
-          <thead><tr><th>שנה</th><th>הכנסות</th><th>חובת מעשר</th><th>נתינה</th><th>יתרה מצטברת</th></tr></thead>
+          <thead><tr><th>שנה</th><th>הכנסות</th><th>הוצאות</th><th>נטו</th><th>חובת מעשר</th><th>נתינה</th><th>יתרה מצטברת</th></tr></thead>
           <tbody id="yearlyBody"></tbody>
         </table>
       </div>
@@ -636,7 +665,7 @@ function getPickerISO(picker){
   return picker.el.querySelector('[data-part="native"]').value || todayISO();
 }
 
-var incomePicker, givingPicker;
+var incomePicker, givingPicker, expensePicker;
 
 /* ===================== רשומות ===================== */
 function addEntry(type, amount, dateISO, note){
@@ -662,15 +691,19 @@ function updateEntry(id, amount, dateISO, note){
 
 var editingId = null;
 
-/* ===================== חישובים ===================== */
+/* ===================== חישובים =====================
+   מעשר מחושב על רווח נטו (הכנסות פחות הוצאות עסקיות), לא על ההכנסה הגולמית —
+   כך שהוצאה עסקית מקטינה את חובת המעשר, ובעקיפין את היתרה שנותר לתת. */
 function totals(entries){
-  var income=0, given=0;
+  var income=0, given=0, expense=0;
   entries.forEach(function(e){
     if (e.type === 'income') income += e.amount;
+    else if (e.type === 'expense') expense += e.amount;
     else given += e.amount;
   });
-  var obligation = income * (state.settings.percent/100);
-  return { income:income, obligation:obligation, given:given, balance: obligation - given };
+  var netIncome = Math.max(0, income - expense);
+  var obligation = netIncome * (state.settings.percent/100);
+  return { income:income, expense:expense, netIncome:netIncome, obligation:obligation, given:given, balance: obligation - given };
 }
 
 function periodKey(e){
@@ -710,6 +743,7 @@ function renderAll(){
   renderBackupMeta();
   syncDatePickerMode(incomePicker);
   syncDatePickerMode(givingPicker);
+  syncDatePickerMode(expensePicker);
 }
 
 function renderToday(){
@@ -731,6 +765,7 @@ var currentFilter = 'all';
 function renderDashboard(){
   var t = totals(state.entries);
   document.getElementById('statIncome').textContent = money(t.income);
+  document.getElementById('statExpense').textContent = money(t.expense);
   document.getElementById('statObligation').textContent = money(t.obligation);
   document.getElementById('statGiven').textContent = money(t.given);
   var balanceBox = document.getElementById('statBalanceBox');
@@ -756,6 +791,8 @@ function setProgress(barId, pctId, t){
   document.getElementById(pctId).textContent = pct + '%';
 }
 
+var TYPE_LABELS = { income:'הכנסה', expense:'הוצאה עסקית', giving:'נתינה' };
+
 function renderEntries(){
   var body = document.getElementById('entriesBody');
   var list = state.entries.slice().sort(function(a,b){ return b.dateISO.localeCompare(a.dateISO) || b.createdAt-a.createdAt; });
@@ -764,7 +801,7 @@ function renderEntries(){
   body.innerHTML = list.map(function(e){
     return '<tr>' +
       '<td>'+displayDate(e.dateISO)+'</td>' +
-      '<td><span class="tag '+e.type+'">'+(e.type==='income'?'הכנסה':'נתינה')+'</span></td>' +
+      '<td><span class="tag '+e.type+'">'+TYPE_LABELS[e.type]+'</span></td>' +
       '<td>'+money(e.amount)+'</td>' +
       '<td>'+escapeHtml(e.note)+'</td>' +
       '<td class="row-actions">' +
@@ -798,7 +835,7 @@ function renderReportTable(bodyId, emptyId, groups){
     var t = totals(g.items);
     running += t.balance;
     var balCls = running > 0.005 ? 'balance-pos' : 'balance-neg';
-    return '<tr><td>'+g.label+'</td><td>'+money(t.income)+'</td><td>'+money(t.obligation)+'</td><td>'+money(t.given)+'</td>' +
+    return '<tr><td>'+g.label+'</td><td>'+money(t.income)+'</td><td>'+money(t.expense)+'</td><td>'+money(t.netIncome)+'</td><td>'+money(t.obligation)+'</td><td>'+money(t.given)+'</td>' +
       '<td class="'+balCls+'">'+money(Math.abs(running))+(running>0.005?' לתת':' עודף')+'</td></tr>';
   }).join('');
 }
@@ -894,6 +931,7 @@ function rotateQuote(){
 document.addEventListener('DOMContentLoaded', function(){
   incomePicker = buildDatePicker(document.querySelector('#incomeForm [data-role="datepicker"]'));
   givingPicker = buildDatePicker(document.querySelector('#givingForm [data-role="datepicker"]'));
+  expensePicker = buildDatePicker(document.querySelector('#expenseForm [data-role="datepicker"]'));
 
   document.getElementById('calHebrewBtn').addEventListener('click', function(){
     state.settings.calendar = 'hebrew'; saveState(); renderAll();
@@ -936,6 +974,7 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   wireForm('incomeForm', incomePicker, 'income');
   wireForm('givingForm', givingPicker, 'giving');
+  wireForm('expenseForm', expensePicker, 'expense');
 
   document.getElementById('entriesBody').addEventListener('click', function(ev){
     var btn = ev.target.closest('button[data-action]');
@@ -945,11 +984,17 @@ document.addEventListener('DOMContentLoaded', function(){
     if (btn.dataset.action === 'edit') startEdit(id);
   });
 
+  var FORM_BY_TYPE = { income:'incomeForm', expense:'expenseForm', giving:'givingForm' };
+  function pickerByType(type){
+    if (type === 'income') return incomePicker;
+    if (type === 'expense') return expensePicker;
+    return givingPicker;
+  }
   function startEdit(id){
     var e = state.entries.find(function(x){ return x.id === id; });
     if (!e) return;
-    var formId = e.type === 'income' ? 'incomeForm' : 'givingForm';
-    var picker = e.type === 'income' ? incomePicker : givingPicker;
+    var formId = FORM_BY_TYPE[e.type];
+    var picker = pickerByType(e.type);
     var form = document.getElementById(formId);
     form.querySelector('[data-role="amount"]').value = e.amount;
     form.querySelector('[data-role="note"]').value = e.note;
@@ -960,11 +1005,12 @@ document.addEventListener('DOMContentLoaded', function(){
     submitBtn.textContent = 'שמור שינויים';
     form.scrollIntoView({behavior:'smooth', block:'center'});
   }
+  var SUBMIT_LABEL_BY_FORM = { incomeForm:'הוסף הכנסה', expenseForm:'הוסף הוצאה', givingForm:'הוסף תרומה' };
   function exitEditMode(form){
     editingId = null;
     delete form.dataset.editing;
     var submitBtn = form.querySelector('[data-role="submitBtn"]');
-    submitBtn.textContent = form.id === 'incomeForm' ? 'הוסף הכנסה' : 'הוסף תרומה';
+    submitBtn.textContent = SUBMIT_LABEL_BY_FORM[form.id];
   }
 
   document.querySelectorAll('.filter-bar .chip').forEach(function(btn){
