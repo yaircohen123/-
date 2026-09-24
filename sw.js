@@ -1,7 +1,5 @@
-const CACHE_NAME = 'maaser-cache-v2';
+const CACHE_NAME = 'maaser-cache-v3';
 const ASSETS = [
-  './',
-  './index.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -28,6 +26,25 @@ self.addEventListener('activate', function(event){
 self.addEventListener('fetch', function(event){
   if (event.request.method !== 'GET') return;
   if (new URL(event.request.url).origin !== self.location.origin) return;
+
+  var isPage = event.request.mode === 'navigate' || event.request.url.endsWith('/index.html') || event.request.url.endsWith('.html');
+
+  if (isPage){
+    /* דף ה-HTML עצמו: תמיד לנסות רשת קודם (כדי שעדכונים יגיעו מיד), וליפול
+       לגרסה השמורה רק כשאין חיבור בכלל. */
+    event.respondWith(
+      fetch(event.request).then(function(response){
+        var copy = response.clone();
+        caches.open(CACHE_NAME).then(function(cache){ cache.put(event.request, copy); });
+        return response;
+      }).catch(function(){
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
+  /* קבצים סטטיים (אייקונים, manifest): קאש קודם, מהיר ולא משתנה כמעט. */
   event.respondWith(
     caches.match(event.request).then(function(cached){
       if (cached) return cached;
