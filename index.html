@@ -145,12 +145,36 @@ section.block{padding:26px 0;}
 .inspire-body{display:none;}
 .inspire-body.open{display:block;}
 
+/* פעולות מהירות */
+.quick-actions{display:flex;justify-content:center;gap:36px;padding:6px 0 10px;}
+.qa-item{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.qa-label{font-size:14px;font-weight:700;color:var(--ink);}
+.qa-circle{
+  width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;
+  font-size:22px;color:#fff;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.15);transition:transform .15s;
+}
+.qa-circle:active{transform:scale(.92);}
+.qa-circle.qa-income{background:var(--green);}
+.qa-circle.qa-giving{background:var(--gold);color:#1a1400;}
+.qa-circle.qa-expense{background:var(--expense);}
+
+/* חלונית מודל */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(20,25,20,.5);z-index:100;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.modal-card{
+  background:#fff;border-radius:16px;padding:26px 22px;width:100%;max-width:420px;
+  max-height:90vh;overflow-y:auto;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+.modal-card h3{font-size:20px;margin-bottom:18px;text-align:center;}
+.modal-close{
+  position:absolute;left:16px;top:16px;background:none;border:none;font-size:18px;
+  cursor:pointer;color:var(--muted);padding:6px;line-height:1;
+}
+
 /* forms */
-.forms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;}
-.entry-card h3{font-size:17px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.entry-card.income{border-top:4px solid var(--green);}
-.entry-card.giving{border-top:4px solid var(--gold);}
-.entry-card.expense{border-top:4px solid var(--expense);}
 .form-row{margin-bottom:14px;}
 .form-row label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500;}
 .form-row input[type=text],.form-row input[type=number],.form-row input[type=date],.form-row input[type=email],.form-row input[type=password],.form-row select{
@@ -391,67 +415,45 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
     </div>
   </section>
 
-  <!-- הוספת רשומות -->
+  <!-- פעולות מהירות -->
   <section class="block">
-    <div class="section-title"><span class="icon">➕</span><h2>הוספת רשומה</h2></div>
-    <div class="forms-grid">
-      <div class="card entry-card income">
-        <h3>💰 הוספת הכנסה</h3>
-        <form id="incomeForm">
-          <div class="form-row">
-            <label>סכום ההכנסה (₪)</label>
-            <input type="number" min="0" step="0.01" required data-role="amount">
-          </div>
-          <div class="form-row date-picker" data-role="datepicker"></div>
-          <div class="form-row">
-            <label>הערה (מקור ההכנסה)</label>
-            <input type="text" placeholder="למשל: משכורת, פרילנס..." data-role="note">
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-income btn-block" data-role="submitBtn">הוסף הכנסה</button>
-          </div>
-        </form>
+    <div class="quick-actions">
+      <div class="qa-item">
+        <span class="qa-label">הוצאה</span>
+        <button type="button" class="qa-circle qa-expense" data-type="expense" aria-label="הוספת הוצאה עסקית">↗</button>
       </div>
-      <div class="card entry-card giving">
-        <h3>🤲 הוספת תרומה / מעשר שניתן</h3>
-        <form id="givingForm">
-          <div class="form-row">
-            <label>סכום שניתן (₪)</label>
-            <input type="number" min="0" step="0.01" required data-role="amount">
-          </div>
-          <div class="form-row date-picker" data-role="datepicker"></div>
-          <div class="form-row">
-            <label>הערה (יעד התרומה)</label>
-            <input type="text" placeholder="למשל: ישיבה, עני, קופת צדקה..." data-role="note">
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-giving btn-block" data-role="submitBtn">הוסף תרומה</button>
-          </div>
-        </form>
+      <div class="qa-item">
+        <span class="qa-label">תרומה</span>
+        <button type="button" class="qa-circle qa-giving" data-type="giving" aria-label="הוספת תרומה">↗</button>
       </div>
-      <div class="card entry-card expense">
-        <h3>🧾 הוצאה עסקית</h3>
-        <form id="expenseForm">
-          <div class="form-row">
-            <label>סכום ההוצאה (₪)</label>
-            <input type="number" min="0" step="0.01" required data-role="amount">
-          </div>
-          <div class="form-row date-picker" data-role="datepicker"></div>
-          <div class="form-row">
-            <label>הערה (סוג ההוצאה)</label>
-            <input type="text" placeholder="למשל: ציוד, שכירות, ספקים..." data-role="note">
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-expense btn-block" data-role="submitBtn">הוסף הוצאה</button>
-          </div>
-        </form>
+      <div class="qa-item">
+        <span class="qa-label">הכנסה</span>
+        <button type="button" class="qa-circle qa-income" data-type="income" aria-label="הוספת הכנסה">↙</button>
       </div>
     </div>
-    <p style="margin-top:14px;font-size:13px;color:var(--muted);">
-      הוצאות עסקיות מופחתות מסך ההכנסות לפני חישוב חובת המעשר (מעשר מחושב על רווח נטו) —
-      כך שהוספת הוצאה עסקית תקטין את הסכום שנותר לכם לתת.
-    </p>
   </section>
+
+  <!-- חלונית הוספה/עריכה -->
+  <div class="modal-overlay" id="entryModal" hidden>
+    <div class="modal-card">
+      <button type="button" class="modal-close" id="modalCloseBtn" aria-label="סגירה">✕</button>
+      <h3 id="modalTitle">הוספת הכנסה</h3>
+      <form id="modalForm">
+        <div class="form-row">
+          <label id="modalAmountLabel">סכום (₪)</label>
+          <input type="number" id="modalAmount" min="0" step="0.01" required>
+        </div>
+        <div class="form-row date-picker" id="modalDatePicker"></div>
+        <div class="form-row">
+          <label>הערה</label>
+          <input type="text" id="modalNote">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-income btn-block" id="modalSubmitBtn">הוסף</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- רשומות -->
   <section class="block">
@@ -790,7 +792,40 @@ function getPickerISO(picker){
   return picker.el.querySelector('[data-part="native"]').value || todayISO();
 }
 
-var incomePicker, givingPicker, expensePicker;
+var modalPicker;
+var modalType = null;
+var modalEditingId = null;
+
+var ENTRY_META = {
+  income: { label:'הכנסה', addTitle:'הוספת הכנסה', amountLabel:'סכום ההכנסה (₪)', notePlaceholder:'למשל: משכורת, פרילנס...', btnClass:'btn-income' },
+  expense: { label:'הוצאה עסקית', addTitle:'הוספת הוצאה עסקית', amountLabel:'סכום ההוצאה (₪)', notePlaceholder:'למשל: ציוד, שכירות, ספקים...', btnClass:'btn-expense' },
+  giving: { label:'תרומה', addTitle:'הוספת תרומה', amountLabel:'סכום שניתן (₪)', notePlaceholder:'למשל: ישיבה, עני, קופת צדקה...', btnClass:'btn-giving' }
+};
+
+function openModal(type, editEntry){
+  modalType = type;
+  modalEditingId = editEntry ? editEntry.id : null;
+  var meta = ENTRY_META[type];
+  document.getElementById('modalTitle').textContent = editEntry ? 'עריכת ' + meta.label : meta.addTitle;
+  document.getElementById('modalAmountLabel').textContent = meta.amountLabel;
+  var noteInput = document.getElementById('modalNote');
+  noteInput.placeholder = meta.notePlaceholder;
+  noteInput.value = editEntry ? editEntry.note : '';
+  document.getElementById('modalAmount').value = editEntry ? editEntry.amount : '';
+  var submitBtn = document.getElementById('modalSubmitBtn');
+  submitBtn.className = 'btn btn-block ' + meta.btnClass;
+  submitBtn.textContent = editEntry ? 'שמור שינויים' : meta.addTitle;
+  setPickerToISO(modalPicker, editEntry ? editEntry.dateISO : todayISO());
+  syncDatePickerMode(modalPicker);
+  document.getElementById('entryModal').hidden = false;
+  document.getElementById('modalAmount').focus();
+}
+
+function closeModal(){
+  document.getElementById('entryModal').hidden = true;
+  modalType = null;
+  modalEditingId = null;
+}
 
 /* ===================== רשומות ===================== */
 async function addEntry(type, amount, dateISO, note){
@@ -816,8 +851,6 @@ async function updateEntry(id, amount, dateISO, note){
   e.amount = amount; e.dateISO = dateISO; e.note = note || '';
   renderAll();
 }
-
-var editingId = null;
 
 /* ===================== חישובים =====================
    מעשר מחושב על רווח נטו (הכנסות פחות הוצאות עסקיות), לא על ההכנסה הגולמית —
@@ -869,9 +902,7 @@ function renderAll(){
   renderEntries();
   renderReports();
   renderBackupMeta();
-  syncDatePickerMode(incomePicker);
-  syncDatePickerMode(givingPicker);
-  syncDatePickerMode(expensePicker);
+  if (modalPicker) syncDatePickerMode(modalPicker);
 }
 
 function renderToday(){
@@ -1079,9 +1110,7 @@ document.addEventListener('DOMContentLoaded', function(){
     return;
   }
 
-  incomePicker = buildDatePicker(document.querySelector('#incomeForm [data-role="datepicker"]'));
-  givingPicker = buildDatePicker(document.querySelector('#givingForm [data-role="datepicker"]'));
-  expensePicker = buildDatePicker(document.querySelector('#expenseForm [data-role="datepicker"]'));
+  modalPicker = buildDatePicker(document.getElementById('modalDatePicker'));
 
   document.getElementById('calHebrewBtn').addEventListener('click', async function(){
     await persistSettingsPatch({ calendar: 'hebrew' }); renderAll();
@@ -1102,32 +1131,34 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   });
 
-  function wireForm(formId, picker, type){
-    var form = document.getElementById(formId);
-    form.addEventListener('submit', async function(ev){
-      ev.preventDefault();
-      var amountInput = form.querySelector('[data-role="amount"]');
-      var noteInput = form.querySelector('[data-role="note"]');
-      var amount = parseFloat(amountInput.value);
-      if (isNaN(amount) || amount <= 0){ alert('נא להזין סכום תקין.'); return; }
-      var iso = getPickerISO(picker);
-      if (!iso){ alert('תאריך לא תקין.'); return; }
-      var submitBtn = form.querySelector('[data-role="submitBtn"]');
-      submitBtn.disabled = true;
-      if (editingId && form.dataset.editing === editingId){
-        await updateEntry(editingId, amount, iso, noteInput.value);
-        exitEditMode(form);
-      } else {
-        await addEntry(type, amount, iso, noteInput.value);
-      }
-      submitBtn.disabled = false;
-      form.reset();
-      setPickerToISO(picker, todayISO());
-    });
-  }
-  wireForm('incomeForm', incomePicker, 'income');
-  wireForm('givingForm', givingPicker, 'giving');
-  wireForm('expenseForm', expensePicker, 'expense');
+  document.querySelectorAll('.qa-circle').forEach(function(btn){
+    btn.addEventListener('click', function(){ openModal(btn.dataset.type, null); });
+  });
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+  document.getElementById('entryModal').addEventListener('click', function(ev){
+    if (ev.target === ev.currentTarget) closeModal();
+  });
+  document.addEventListener('keydown', function(ev){
+    if (ev.key === 'Escape' && !document.getElementById('entryModal').hidden) closeModal();
+  });
+
+  document.getElementById('modalForm').addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    var amount = parseFloat(document.getElementById('modalAmount').value);
+    if (isNaN(amount) || amount <= 0){ alert('נא להזין סכום תקין.'); return; }
+    var iso = getPickerISO(modalPicker);
+    if (!iso){ alert('תאריך לא תקין.'); return; }
+    var note = document.getElementById('modalNote').value;
+    var submitBtn = document.getElementById('modalSubmitBtn');
+    submitBtn.disabled = true;
+    if (modalEditingId){
+      await updateEntry(modalEditingId, amount, iso, note);
+    } else {
+      await addEntry(modalType, amount, iso, note);
+    }
+    submitBtn.disabled = false;
+    closeModal();
+  });
 
   document.getElementById('entriesBody').addEventListener('click', function(ev){
     var btn = ev.target.closest('button[data-action]');
@@ -1137,33 +1168,10 @@ document.addEventListener('DOMContentLoaded', function(){
     if (btn.dataset.action === 'edit') startEdit(id);
   });
 
-  var FORM_BY_TYPE = { income:'incomeForm', expense:'expenseForm', giving:'givingForm' };
-  function pickerByType(type){
-    if (type === 'income') return incomePicker;
-    if (type === 'expense') return expensePicker;
-    return givingPicker;
-  }
   function startEdit(id){
     var e = state.entries.find(function(x){ return x.id === id; });
     if (!e) return;
-    var formId = FORM_BY_TYPE[e.type];
-    var picker = pickerByType(e.type);
-    var form = document.getElementById(formId);
-    form.querySelector('[data-role="amount"]').value = e.amount;
-    form.querySelector('[data-role="note"]').value = e.note;
-    setPickerToISO(picker, e.dateISO);
-    editingId = id;
-    form.dataset.editing = id;
-    var submitBtn = form.querySelector('[data-role="submitBtn"]');
-    submitBtn.textContent = 'שמור שינויים';
-    form.scrollIntoView({behavior:'smooth', block:'center'});
-  }
-  var SUBMIT_LABEL_BY_FORM = { incomeForm:'הוסף הכנסה', expenseForm:'הוסף הוצאה', givingForm:'הוסף תרומה' };
-  function exitEditMode(form){
-    editingId = null;
-    delete form.dataset.editing;
-    var submitBtn = form.querySelector('[data-role="submitBtn"]');
-    submitBtn.textContent = SUBMIT_LABEL_BY_FORM[form.id];
+    openModal(e.type, e);
   }
 
   document.querySelectorAll('.filter-bar .chip').forEach(function(btn){
