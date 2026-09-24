@@ -58,6 +58,7 @@ a{color:inherit;}
   background-size:220px; background-repeat:repeat; opacity:.05;
 }
 .hero-inner{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;}
+.hero > .container{position:relative;z-index:2;}
 .brand{max-width:640px;}
 .motto-tag{display:inline-block;background:var(--gold);color:#1a1400;font-weight:700;padding:5px 14px;border-radius:20px;font-size:13px;margin-bottom:12px;}
 .hero h1{font-size:30px;font-weight:900;margin-bottom:8px;}
@@ -152,9 +153,10 @@ section.block{padding:26px 0;}
 .entry-card.expense{border-top:4px solid var(--expense);}
 .form-row{margin-bottom:14px;}
 .form-row label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500;}
-.form-row input[type=text],.form-row input[type=number],.form-row input[type=date],.form-row select{
-  width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:inherit;background:#fff;
+.form-row input[type=text],.form-row input[type=number],.form-row input[type=date],.form-row input[type=email],.form-row input[type=password],.form-row select{
+  width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;font-size:16px;font-family:inherit;background:#fff;
 }
+.form-row input:focus,.form-row select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.15);}
 .date-fields{display:flex;gap:8px;}
 .date-fields > div{flex:1;}
 .date-fields.hidden,.date-native.hidden{display:none;}
@@ -219,10 +221,21 @@ input[type=file]{display:none;}
   font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;
 }
 #authGate{padding:40px 0;}
-.auth-card{max-width:420px;margin:0 auto;text-align:center;}
-.auth-card h2{font-size:22px;margin-bottom:8px;}
-.auth-card p.lead{color:var(--muted);font-size:14px;margin-bottom:22px;}
-.auth-card .form-row{text-align:right;}
+.auth-card{max-width:440px;margin:0 auto;text-align:center;padding:32px 28px;}
+.auth-card h2{font-size:24px;margin-bottom:8px;}
+.auth-card p.lead{color:var(--muted);font-size:14.5px;margin-bottom:24px;line-height:1.7;}
+.auth-card .form-row{text-align:right;margin-bottom:18px;}
+.auth-card .form-row label{font-size:14px;margin-bottom:7px;}
+.auth-card .form-row input{padding:14px;font-size:17px;border-radius:10px;}
+.auth-card .form-hint{font-size:12px;color:var(--muted);margin-top:5px;}
+.password-field{position:relative;}
+.password-field input{padding-left:44px!important;}
+.password-toggle{
+  position:absolute;left:6px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:18px;padding:8px;color:var(--muted);line-height:1;
+}
+.auth-card .btn{padding:14px 18px;font-size:16.5px;}
+#appLoading{text-align:center;color:var(--muted);padding:60px 0;font-size:15px;}
 .auth-error{
   background:#fdeceb;color:var(--danger);border:1px solid #f3c6c2;border-radius:8px;
   padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;
@@ -271,17 +284,20 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
   <section id="authGate" class="block">
     <div class="card auth-card">
       <h2 id="authTitle">התחברות</h2>
-      <p class="lead">הנתונים שלך נשמרים בענן (Supabase) ומסונכרנים לכל מכשיר שתתחבר/י ממנו.</p>
+      <p class="lead">הנתונים שלך נשמרים בענן בצורה מאובטחת, ומסונכרנים אוטומטית לכל מכשיר שתתחבר/י ממנו.</p>
       <div class="auth-error" id="authError"></div>
       <div class="auth-note" id="authNote"></div>
       <form id="authForm">
         <div class="form-row">
-          <label>אימייל</label>
-          <input type="email" id="authEmail" required autocomplete="email">
+          <label for="authEmail">אימייל</label>
+          <input type="email" id="authEmail" required autocomplete="email" placeholder="you@example.com">
         </div>
         <div class="form-row">
-          <label>סיסמה</label>
-          <input type="password" id="authPassword" required autocomplete="current-password" minlength="6">
+          <label for="authPassword">סיסמה</label>
+          <div class="password-field">
+            <input type="password" id="authPassword" required autocomplete="current-password" minlength="6" placeholder="לפחות 6 תווים">
+            <button type="button" class="password-toggle" id="authPasswordToggle" aria-label="הצג/הסתר סיסמה">👁️</button>
+          </div>
         </div>
         <div class="form-actions">
           <button type="submit" class="btn btn-income btn-block" id="authSubmitBtn">התחברות</button>
@@ -293,6 +309,8 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
       </div>
     </div>
   </section>
+
+  <div id="appLoading" hidden>טוען את הנתונים שלך…</div>
 
   <div id="appSections" hidden>
   <div id="backupBanner">
@@ -667,18 +685,21 @@ function money(n){
   return '₪' + (Math.round(n*100)/100).toLocaleString('he-IL', {minimumFractionDigits:0, maximumFractionDigits:2});
 }
 
-/* ===================== בורר תאריך ===================== */
+/* ===================== בורר תאריך =====================
+   בלוח העברי כל שלושת השדות (יום/חודש/שנה) מוצגים באותיות עבריות (גימטריה),
+   בדיוק כמו שתאריך עברי נכתב בפועל — לא במספרים. */
 function buildDatePicker(container){
   container.innerHTML =
     '<label>תאריך</label>' +
     '<div class="date-fields" data-mode="hebrew">' +
       '<div><select data-part="day"></select></div>' +
       '<div><select data-part="month"></select></div>' +
-      '<div><input type="number" data-part="year" min="5000" max="6500"></div>' +
+      '<div><select data-part="year"></select></div>' +
     '</div>' +
     '<div class="date-native" data-mode="gregorian"><input type="date" data-part="native"></div>' +
     '<button type="button" class="chip" style="margin-top:8px" data-role="todayBtn">היום</button>';
   var picker = { el: container };
+  populateHebrewYearSelect(picker);
   syncDatePickerMode(picker);
   setPickerToISO(picker, todayISO());
 
@@ -697,6 +718,16 @@ function buildDatePicker(container){
 function getSelectValue(picker, part){
   var sel = picker.el.querySelector('[data-part="'+part+'"]');
   return sel ? sel.value : null;
+}
+
+function populateHebrewYearSelect(picker){
+  var sel = picker.el.querySelector('[data-part="year"]');
+  var prev = sel.value;
+  var anchor = hebrewPartsFromISO(todayISO()).year;
+  var opts = [];
+  for (var y=anchor-5; y<=anchor+2; y++) opts.push('<option value="'+y+'">'+hebrewNumeral(y)+'</option>');
+  sel.innerHTML = opts.join('');
+  sel.value = prev && Number(prev) >= anchor-5 && Number(prev) <= anchor+2 ? prev : anchor;
 }
 
 function populateHebrewMonthSelect(picker, keepMonth){
@@ -720,7 +751,7 @@ function populateHebrewDaySelect(picker){
   var sel = picker.el.querySelector('[data-part="day"]');
   var prev = parseInt(sel.value,10) || 1;
   var opts = [];
-  for (var d=1; d<=daysCount; d++) opts.push('<option value="'+d+'">'+d+'</option>');
+  for (var d=1; d<=daysCount; d++) opts.push('<option value="'+d+'">'+hebrewNumeral(d)+'</option>');
   sel.innerHTML = opts.join('');
   sel.value = Math.min(prev, daysCount);
 }
@@ -733,7 +764,14 @@ function syncDatePickerMode(picker){
 
 function setPickerToISO(picker, iso){
   var hp = hebrewPartsFromISO(iso);
-  picker.el.querySelector('[data-part="year"]').value = hp.year;
+  var yearSel = picker.el.querySelector('[data-part="year"]');
+  var hasOption = Array.prototype.some.call(yearSel.options, function(o){ return Number(o.value) === hp.year; });
+  if (!hasOption){
+    var opt = document.createElement('option');
+    opt.value = hp.year; opt.textContent = hebrewNumeral(hp.year);
+    yearSel.appendChild(opt);
+  }
+  yearSel.value = hp.year;
   populateHebrewMonthSelect(picker, hp.month);
   picker.el.querySelector('[data-part="day"]').value = hp.day;
   picker.el.querySelector('[data-part="native"]').value = iso;
@@ -1194,11 +1232,18 @@ document.addEventListener('DOMContentLoaded', function(){
     setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
   });
 
+  document.getElementById('authPasswordToggle').addEventListener('click', function(){
+    var isHidden = authPassword.type === 'password';
+    authPassword.type = isHidden ? 'text' : 'password';
+    this.textContent = isHidden ? '🙈' : '👁️';
+  });
+
   authForm.addEventListener('submit', async function(ev){
     ev.preventDefault();
     authError.style.display = 'none';
     authNote.style.display = 'none';
     authSubmitBtn.disabled = true;
+    authSubmitBtn.textContent = authMode === 'signup' ? 'נרשם/ת…' : 'מתחבר/ת…';
     var email = authEmail.value.trim();
     var password = authPassword.value;
     try{
@@ -1219,6 +1264,7 @@ document.addEventListener('DOMContentLoaded', function(){
       authError.style.display = 'block';
     }
     authSubmitBtn.disabled = false;
+    authSubmitBtn.textContent = authMode === 'signup' ? 'הרשמה' : 'התחברות';
   });
 
   document.getElementById('logoutBtn').addEventListener('click', async function(){
@@ -1240,7 +1286,8 @@ document.addEventListener('DOMContentLoaded', function(){
 async function enterApp(user){
   currentUser = user;
   document.getElementById('authGate').hidden = true;
-  document.getElementById('appSections').hidden = false;
+  document.getElementById('appSections').hidden = true;
+  document.getElementById('appLoading').hidden = false;
   var userBar = document.getElementById('userBar');
   userBar.hidden = false;
   document.getElementById('userEmailLabel').textContent = user.email;
@@ -1250,11 +1297,14 @@ async function enterApp(user){
   }catch(err){
     alert('שגיאה בטעינת הנתונים מהענן: ' + (err && err.message ? err.message : err));
   }
+  document.getElementById('appLoading').hidden = true;
+  document.getElementById('appSections').hidden = false;
 }
 
 function showAuthGate(){
   currentUser = null;
   document.getElementById('authGate').hidden = false;
+  document.getElementById('appLoading').hidden = true;
   document.getElementById('appSections').hidden = true;
   document.getElementById('userBar').hidden = true;
 }
