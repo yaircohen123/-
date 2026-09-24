@@ -12,10 +12,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="מעשר כספים">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap">
+<link rel="preconnect" href="https://wrearabaahjdtnnpmujz.supabase.co">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
-
 :root{
   --gold:#d4af37;
   --gold-dark:#b3901f;
@@ -275,7 +277,16 @@ input[type=file]{display:none;}
 footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;padding:0 18px;}
 
 @media (max-width:600px){
-  .hero h1{font-size:24px;}
+  .hero{padding:16px 0 14px;}
+  .hero h1{font-size:19px;margin-bottom:3px;}
+  .hero .sub{display:none;}
+  .motto-tag{font-size:11px;padding:3px 10px;margin-bottom:6px;}
+  .today-line{margin-top:8px;font-size:12px;padding:4px 10px;}
+  .user-bar{margin-top:8px;padding:6px 12px;font-size:12px;}
+  .qa-block{padding:14px 0 6px;}
+  .quick-actions{gap:22px;}
+  .qa-circle{width:52px;height:52px;font-size:19px;}
+  section.block{padding:16px 0;}
   .settings-row{gap:14px;}
   th,td{font-size:12.5px;padding:7px 5px;}
 }
@@ -345,6 +356,24 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
     <button id="bannerBackupBtn">גיבוי עכשיו</button>
   </div>
 
+  <!-- פעולות מהירות -->
+  <section class="block qa-block">
+    <div class="quick-actions">
+      <div class="qa-item">
+        <span class="qa-label">הוצאה</span>
+        <button type="button" class="qa-circle qa-expense" data-type="expense" aria-label="הוספת הוצאה עסקית">↗</button>
+      </div>
+      <div class="qa-item">
+        <span class="qa-label">תרומה</span>
+        <button type="button" class="qa-circle qa-giving" data-type="giving" aria-label="הוספת תרומה">↗</button>
+      </div>
+      <div class="qa-item">
+        <span class="qa-label">הכנסה</span>
+        <button type="button" class="qa-circle qa-income" data-type="income" aria-label="הוספת הכנסה">↙</button>
+      </div>
+    </div>
+  </section>
+
   <!-- הגדרות -->
   <section class="block">
     <div class="card">
@@ -411,24 +440,6 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
           <p>יחד עם זאת, העושר שהתורה מברכת בו הוא עושר שמנוצל לדברים טובים, יהודיים ומשמחים — ולא צבירה כשלעצמה.</p>
           <p class="src">המקורות: מלאכי ג, י; תלמוד בבלי תענית ט, א; תכתובת הרבי מליובאוויטש עם איש עסקים ממנצ׳סטר ("Direct Correspondence with the Rebbe", Chabad.org); שיחת נצבים-וילך תשמ״ג; הוראות הרבי על התחייבות כתובה לצדקה קבועה ("פתיחת צינור" לפרנסה). תוכן זה מובא כסיכום נאמן למקורות המפורסמים בשם הרבי, ולא כמובאה מדויקת מילה במילה.</p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- פעולות מהירות -->
-  <section class="block">
-    <div class="quick-actions">
-      <div class="qa-item">
-        <span class="qa-label">הוצאה</span>
-        <button type="button" class="qa-circle qa-expense" data-type="expense" aria-label="הוספת הוצאה עסקית">↗</button>
-      </div>
-      <div class="qa-item">
-        <span class="qa-label">תרומה</span>
-        <button type="button" class="qa-circle qa-giving" data-type="giving" aria-label="הוספת תרומה">↗</button>
-      </div>
-      <div class="qa-item">
-        <span class="qa-label">הכנסה</span>
-        <button type="button" class="qa-circle qa-income" data-type="income" aria-label="הוספת הכנסה">↙</button>
       </div>
     </div>
   </section>
@@ -636,13 +647,10 @@ function todayISO(){
    עם הרשאות גישה (RLS) כך שכל משתמש רואה ושומר רק את הנתונים שלו. */
 var SUPABASE_URL = 'https://wrearabaahjdtnnpmujz.supabase.co';
 var SUPABASE_ANON_KEY = 'sb_publishable_uOpzE8eLJ0GNkWe93RKNXQ_oVkC4tHy';
+/* sb מאותחל בתוך DOMContentLoaded (ולא כאן ברמת המודול), כי טעינת ספריית
+   Supabase מסומנת defer כדי לא לחסום את רינדור העמוד — והיא מובטחת
+   להיות זמינה רק עד DOMContentLoaded, לא בזמן ריצת ה-script הזה עצמו. */
 var sb = null;
-try{
-  if (!window.supabase) throw new Error('supabase-js לא נטען');
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-}catch(err){
-  console.error('Supabase init failed', err);
-}
 
 var state = { settings:{ percent:10, calendar:'hebrew', lastBackup:null }, entries:[] };
 var currentUser = null;
@@ -652,9 +660,14 @@ function rowToEntry(row){
 }
 
 async function loadRemoteState(userId){
-  var entriesRes = await sb.from('entries').select('*').order('date_iso', {ascending:false});
+  /* שתי השאילתות עצמאיות זו מזו — מריצים אותן במקביל כדי לחתוך בערך חצי
+     מזמן ההמתנה לרשת בהשוואה לרצף sequential. */
+  var results = await Promise.all([
+    sb.from('entries').select('*').order('date_iso', {ascending:false}),
+    sb.from('user_settings').select('*').eq('user_id', userId).maybeSingle()
+  ]);
+  var entriesRes = results[0], settingsRes = results[1];
   if (entriesRes.error) throw entriesRes.error;
-  var settingsRes = await sb.from('user_settings').select('*').eq('user_id', userId).maybeSingle();
   if (settingsRes.error) throw settingsRes.error;
   var settingsRow = settingsRes.data;
   if (!settingsRow){
@@ -1102,6 +1115,12 @@ function rotateQuote(){
 
 /* ===================== אתחול ===================== */
 document.addEventListener('DOMContentLoaded', function(){
+  try{
+    if (!window.supabase) throw new Error('supabase-js לא נטען');
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }catch(err){
+    console.error('Supabase init failed', err);
+  }
   if (!sb){
     var authError0 = document.getElementById('authError');
     authError0.textContent = 'לא הצלחנו לטעון את שירותי הענן. בדוק/י חיבור לאינטרנט ורענן/י את הדף.';
