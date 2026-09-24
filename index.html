@@ -275,7 +275,10 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
   <div class="container">
     <div class="user-bar" id="userBar" hidden>
       <span>מחובר/ת כ־<strong id="userEmailLabel"></strong></span>
-      <button id="logoutBtn">התנתקות</button>
+      <span style="display:flex;gap:8px;">
+        <button id="refreshBtn" title="רענון">🔄 רענון</button>
+        <button id="logoutBtn">התנתקות</button>
+      </span>
     </div>
   </div>
 </section>
@@ -1269,6 +1272,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
   document.getElementById('logoutBtn').addEventListener('click', async function(){
     await sb.auth.signOut();
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', function(){
+    window.location.reload();
   });
 
   sb.auth.onAuthStateChange(function(event, session){
