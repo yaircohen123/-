@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="מעשר כספים">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap');
 
@@ -208,6 +209,32 @@ tr:hover td{background:#faf9f5;}
 .backup-meta{font-size:13px;color:var(--muted);}
 input[type=file]{display:none;}
 
+/* auth */
+.user-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  background:rgba(255,255,255,.12);color:#fff;border-radius:10px;padding:8px 16px;margin-top:14px;font-size:13px;
+}
+.user-bar button{
+  background:rgba(255,255,255,.2);color:#fff;border:none;padding:6px 14px;border-radius:20px;
+  font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;
+}
+#authGate{padding:40px 0;}
+.auth-card{max-width:420px;margin:0 auto;text-align:center;}
+.auth-card h2{font-size:22px;margin-bottom:8px;}
+.auth-card p.lead{color:var(--muted);font-size:14px;margin-bottom:22px;}
+.auth-card .form-row{text-align:right;}
+.auth-error{
+  background:#fdeceb;color:var(--danger);border:1px solid #f3c6c2;border-radius:8px;
+  padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;
+}
+.auth-note{
+  background:#eef6f0;color:var(--green-dark);border:1px solid #cfe8d7;border-radius:8px;
+  padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;
+}
+.auth-switch{margin-top:16px;font-size:13px;color:var(--muted);}
+.auth-switch button{background:none;border:none;color:var(--gold-dark);font-weight:700;cursor:pointer;font-family:inherit;font-size:13px;text-decoration:underline;padding:0;}
+[hidden]{display:none!important;}
+
 footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;padding:0 18px;}
 
 @media (max-width:600px){
@@ -232,9 +259,42 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
       <button id="calGregBtn">לועזי</button>
     </div>
   </div>
+  <div class="container">
+    <div class="user-bar" id="userBar" hidden>
+      <span>מחובר/ת כ־<strong id="userEmailLabel"></strong></span>
+      <button id="logoutBtn">התנתקות</button>
+    </div>
+  </div>
 </section>
 
 <div class="container">
+  <section id="authGate" class="block">
+    <div class="card auth-card">
+      <h2 id="authTitle">התחברות</h2>
+      <p class="lead">הנתונים שלך נשמרים בענן (Supabase) ומסונכרנים לכל מכשיר שתתחבר/י ממנו.</p>
+      <div class="auth-error" id="authError"></div>
+      <div class="auth-note" id="authNote"></div>
+      <form id="authForm">
+        <div class="form-row">
+          <label>אימייל</label>
+          <input type="email" id="authEmail" required autocomplete="email">
+        </div>
+        <div class="form-row">
+          <label>סיסמה</label>
+          <input type="password" id="authPassword" required autocomplete="current-password" minlength="6">
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-income btn-block" id="authSubmitBtn">התחברות</button>
+        </div>
+      </form>
+      <div class="auth-switch">
+        <span id="authSwitchText">אין לך עדיין חשבון?</span>
+        <button type="button" id="authSwitchBtn">הרשמה</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="appSections" hidden>
   <div id="backupBanner">
     <span>⏰ עברו יותר מ-30 יום מהגיבוי האחרון של הנתונים שלך. מומלץ לגבות כדי שהמעקב שלך לא יאבד.</span>
     <button id="bannerBackupBtn">גיבוי עכשיו</button>
@@ -425,7 +485,7 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
   <section class="block">
     <div class="section-title"><span class="icon">💾</span><h2>גיבוי ושחזור נתונים</h2></div>
     <div class="card">
-      <p style="margin-bottom:12px;color:var(--muted);font-size:14px;">הנתונים נשמרים במכשיר שלך בלבד (בזיכרון הדפדפן). כדי להבטיח שהם לא יימחקו — מומלץ לייצא גיבוי לקובץ מדי פעם, בעיקר לפני ניקוי היסטוריית הדפדפן או מעבר למכשיר אחר.</p>
+      <p style="margin-bottom:12px;color:var(--muted);font-size:14px;">הנתונים שלך נשמרים בענן ומסונכרנים אוטומטית לכל מכשיר שתתחבר/י ממנו. עדיין מומלץ לייצא גיבוי מקומי מדי פעם כרשת ביטחון נוספת.</p>
       <div class="backup-row">
         <button class="btn btn-secondary" id="exportBtn">⬇️ ייצוא גיבוי</button>
         <button class="btn btn-secondary" id="importBtn">⬆️ ייבוא גיבוי</button>
@@ -438,6 +498,7 @@ footer{margin-top:30px;text-align:center;color:var(--muted);font-size:13px;paddi
   <footer>
     <p>© מעשר כספים — כלי אישי למעקב וחיזוק ההרגל הטוב. "עשר בשביל שתתעשר".</p>
   </footer>
+  </div>
 </div>
 
 <script>
@@ -547,27 +608,50 @@ function todayISO(){
   return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
 }
 
-/* ===================== אחסון ===================== */
-var STORAGE_KEY = 'maaser_v1';
-
-function loadState(){
-  try{
-    var raw = localStorage.getItem(STORAGE_KEY);
-    if (raw){
-      var parsed = JSON.parse(raw);
-      if (parsed && parsed.settings && Array.isArray(parsed.entries)) return parsed;
-    }
-  }catch(e){ console.warn('load failed', e); }
-  return { settings:{ percent:10, calendar:'hebrew', lastBackup:null }, entries:[] };
+/* ===================== ענן (Supabase) =====================
+   כל נתוני המשתמש (הכנסות/הוצאות/נתינות + הגדרות) נשמרים בענן דרך Supabase,
+   עם הרשאות גישה (RLS) כך שכל משתמש רואה ושומר רק את הנתונים שלו. */
+var SUPABASE_URL = 'https://wrearabaahjdtnnpmujz.supabase.co';
+var SUPABASE_ANON_KEY = 'sb_publishable_uOpzE8eLJ0GNkWe93RKNXQ_oVkC4tHy';
+var sb = null;
+try{
+  if (!window.supabase) throw new Error('supabase-js לא נטען');
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}catch(err){
+  console.error('Supabase init failed', err);
 }
 
-var state = loadState();
+var state = { settings:{ percent:10, calendar:'hebrew', lastBackup:null }, entries:[] };
+var currentUser = null;
 
-function saveState(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function rowToEntry(row){
+  return { id: row.id, type: row.type, dateISO: row.date_iso, amount: Number(row.amount), note: row.note || '', createdAt: new Date(row.created_at).getTime() };
 }
 
-function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+async function loadRemoteState(userId){
+  var entriesRes = await sb.from('entries').select('*').order('date_iso', {ascending:false});
+  if (entriesRes.error) throw entriesRes.error;
+  var settingsRes = await sb.from('user_settings').select('*').eq('user_id', userId).maybeSingle();
+  if (settingsRes.error) throw settingsRes.error;
+  var settingsRow = settingsRes.data;
+  if (!settingsRow){
+    var created = await sb.from('user_settings').insert({ user_id:userId, percent:10, calendar:'hebrew' }).select().single();
+    if (created.error) throw created.error;
+    settingsRow = created.data;
+  }
+  state = {
+    settings: { percent:Number(settingsRow.percent), calendar:settingsRow.calendar, lastBackup: settingsRow.last_backup ? new Date(settingsRow.last_backup).getTime() : null },
+    entries: (entriesRes.data || []).map(rowToEntry)
+  };
+}
+
+async function persistSettingsPatch(patch){
+  Object.assign(state.settings, patch);
+  var payload = { user_id: currentUser.id, percent: state.settings.percent, calendar: state.settings.calendar, updated_at: new Date().toISOString() };
+  if (state.settings.lastBackup) payload.last_backup = new Date(state.settings.lastBackup).toISOString();
+  var res = await sb.from('user_settings').upsert(payload);
+  if (res.error){ alert('שגיאה בשמירת ההגדרות: ' + res.error.message); }
+}
 
 /* ===================== עזרי תאריך לתצוגה ===================== */
 function displayDate(iso){
@@ -668,24 +752,27 @@ function getPickerISO(picker){
 var incomePicker, givingPicker, expensePicker;
 
 /* ===================== רשומות ===================== */
-function addEntry(type, amount, dateISO, note){
-  state.entries.push({ id: uid(), type: type, dateISO: dateISO, amount: amount, note: note || '', createdAt: Date.now() });
-  saveState();
+async function addEntry(type, amount, dateISO, note){
+  var res = await sb.from('entries').insert({ user_id:currentUser.id, type:type, date_iso:dateISO, amount:amount, note:note || '' }).select().single();
+  if (res.error){ alert('שגיאה בשמירת הרשומה: ' + res.error.message); return; }
+  state.entries.push(rowToEntry(res.data));
   renderAll();
 }
 
-function deleteEntry(id){
+async function deleteEntry(id){
   if (!confirm('למחוק את הרשומה?')) return;
+  var res = await sb.from('entries').delete().eq('id', id);
+  if (res.error){ alert('שגיאה במחיקת הרשומה: ' + res.error.message); return; }
   state.entries = state.entries.filter(function(e){ return e.id !== id; });
-  saveState();
   renderAll();
 }
 
-function updateEntry(id, amount, dateISO, note){
+async function updateEntry(id, amount, dateISO, note){
+  var res = await sb.from('entries').update({ amount:amount, date_iso:dateISO, note:note || '' }).eq('id', id);
+  if (res.error){ alert('שגיאה בעדכון הרשומה: ' + res.error.message); return; }
   var e = state.entries.find(function(x){ return x.id === id; });
   if (!e) return;
   e.amount = amount; e.dateISO = dateISO; e.note = note || '';
-  saveState();
   renderAll();
 }
 
@@ -875,8 +962,10 @@ function renderBackupMeta(){
   banner.style.display = (state.entries.length > 0 && daysSince > 30) ? 'flex' : 'none';
 }
 
-/* ===================== גיבוי / שחזור ===================== */
-function exportBackup(){
+/* ===================== גיבוי / שחזור =====================
+   הנתונים כבר שמורים בענן; הייצוא/ייבוא כאן הוא רשת ביטחון נוספת (קובץ מקומי
+   שאפשר לשחזר ממנו גם אם משהו קורה לחשבון הענן). */
+async function exportBackup(){
   var blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
@@ -887,26 +976,38 @@ function exportBackup(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  state.settings.lastBackup = Date.now();
-  saveState();
+  await persistSettingsPatch({ lastBackup: Date.now() });
   renderBackupMeta();
 }
 
 function importBackup(file){
   var reader = new FileReader();
-  reader.onload = function(){
+  reader.onload = async function(){
     try{
       var data = JSON.parse(reader.result);
       if (!data || !Array.isArray(data.entries) || !data.settings) throw new Error('bad format');
-      if (!confirm('הפעולה תחליף את כל הנתונים הקיימים בנתוני קובץ הגיבוי. להמשיך?')) return;
-      state = data;
-      if (typeof state.settings.percent !== 'number') state.settings.percent = 10;
-      if (!state.settings.calendar) state.settings.calendar = 'hebrew';
-      saveState();
+      if (!confirm('הפעולה תחליף את כל הנתונים הקיימים בענן בנתוני קובץ הגיבוי. להמשיך?')) return;
+
+      var delRes = await sb.from('entries').delete().eq('user_id', currentUser.id);
+      if (delRes.error) throw delRes.error;
+
+      var rows = data.entries.map(function(e){
+        return { user_id:currentUser.id, type:e.type, date_iso:e.dateISO, amount:e.amount, note:e.note || '' };
+      }).filter(function(r){ return ['income','expense','giving'].indexOf(r.type) !== -1 && r.date_iso && r.amount > 0; });
+      if (rows.length){
+        var insRes = await sb.from('entries').insert(rows);
+        if (insRes.error) throw insRes.error;
+      }
+
+      var percent = typeof data.settings.percent === 'number' ? data.settings.percent : 10;
+      var calendar = data.settings.calendar || 'hebrew';
+      await persistSettingsPatch({ percent:percent, calendar:calendar });
+
+      await loadRemoteState(currentUser.id);
       renderAll();
       alert('הייבוא הושלם בהצלחה.');
     }catch(err){
-      alert('קובץ הגיבוי אינו תקין.');
+      alert('קובץ הגיבוי אינו תקין, או שאירעה שגיאה בייבוא: ' + (err && err.message ? err.message : err));
     }
   };
   reader.readAsText(file);
@@ -929,32 +1030,40 @@ function rotateQuote(){
 
 /* ===================== אתחול ===================== */
 document.addEventListener('DOMContentLoaded', function(){
+  if (!sb){
+    var authError0 = document.getElementById('authError');
+    authError0.textContent = 'לא הצלחנו לטעון את שירותי הענן. בדוק/י חיבור לאינטרנט ורענן/י את הדף.';
+    authError0.style.display = 'block';
+    document.getElementById('authSubmitBtn').disabled = true;
+    return;
+  }
+
   incomePicker = buildDatePicker(document.querySelector('#incomeForm [data-role="datepicker"]'));
   givingPicker = buildDatePicker(document.querySelector('#givingForm [data-role="datepicker"]'));
   expensePicker = buildDatePicker(document.querySelector('#expenseForm [data-role="datepicker"]'));
 
-  document.getElementById('calHebrewBtn').addEventListener('click', function(){
-    state.settings.calendar = 'hebrew'; saveState(); renderAll();
+  document.getElementById('calHebrewBtn').addEventListener('click', async function(){
+    await persistSettingsPatch({ calendar: 'hebrew' }); renderAll();
   });
-  document.getElementById('calGregBtn').addEventListener('click', function(){
-    state.settings.calendar = 'gregorian'; saveState(); renderAll();
+  document.getElementById('calGregBtn').addEventListener('click', async function(){
+    await persistSettingsPatch({ calendar: 'gregorian' }); renderAll();
   });
 
-  document.getElementById('percentInput').addEventListener('change', function(e){
+  document.getElementById('percentInput').addEventListener('change', async function(e){
     var v = parseFloat(e.target.value);
     if (isNaN(v) || v < 0) v = 0;
     if (v > 100) v = 100;
-    state.settings.percent = v; saveState(); renderAll();
+    await persistSettingsPatch({ percent: v }); renderAll();
   });
   document.querySelectorAll('.chip[data-percent]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      state.settings.percent = Number(btn.dataset.percent); saveState(); renderAll();
+    btn.addEventListener('click', async function(){
+      await persistSettingsPatch({ percent: Number(btn.dataset.percent) }); renderAll();
     });
   });
 
   function wireForm(formId, picker, type){
     var form = document.getElementById(formId);
-    form.addEventListener('submit', function(ev){
+    form.addEventListener('submit', async function(ev){
       ev.preventDefault();
       var amountInput = form.querySelector('[data-role="amount"]');
       var noteInput = form.querySelector('[data-role="note"]');
@@ -962,12 +1071,15 @@ document.addEventListener('DOMContentLoaded', function(){
       if (isNaN(amount) || amount <= 0){ alert('נא להזין סכום תקין.'); return; }
       var iso = getPickerISO(picker);
       if (!iso){ alert('תאריך לא תקין.'); return; }
+      var submitBtn = form.querySelector('[data-role="submitBtn"]');
+      submitBtn.disabled = true;
       if (editingId && form.dataset.editing === editingId){
-        updateEntry(editingId, amount, iso, noteInput.value);
+        await updateEntry(editingId, amount, iso, noteInput.value);
         exitEditMode(form);
       } else {
-        addEntry(type, amount, iso, noteInput.value);
+        await addEntry(type, amount, iso, noteInput.value);
       }
+      submitBtn.disabled = false;
       form.reset();
       setPickerToISO(picker, todayISO());
     });
@@ -1049,8 +1161,103 @@ document.addEventListener('DOMContentLoaded', function(){
 
   rotateQuote();
   setInterval(rotateQuote, 7000);
-  renderAll();
+
+  /* ===================== התחברות / הרשמה ===================== */
+  var authMode = 'signin';
+  var authForm = document.getElementById('authForm');
+  var authEmail = document.getElementById('authEmail');
+  var authPassword = document.getElementById('authPassword');
+  var authError = document.getElementById('authError');
+  var authNote = document.getElementById('authNote');
+  var authSubmitBtn = document.getElementById('authSubmitBtn');
+  var authTitle = document.getElementById('authTitle');
+  var authSwitchText = document.getElementById('authSwitchText');
+  var authSwitchBtn = document.getElementById('authSwitchBtn');
+
+  function setAuthMode(mode){
+    authMode = mode;
+    authError.style.display = 'none';
+    authNote.style.display = 'none';
+    if (mode === 'signin'){
+      authTitle.textContent = 'התחברות';
+      authSubmitBtn.textContent = 'התחברות';
+      authSwitchText.textContent = 'אין לך עדיין חשבון?';
+      authSwitchBtn.textContent = 'הרשמה';
+    } else {
+      authTitle.textContent = 'הרשמה';
+      authSubmitBtn.textContent = 'הרשמה';
+      authSwitchText.textContent = 'יש לך כבר חשבון?';
+      authSwitchBtn.textContent = 'התחברות';
+    }
+  }
+  authSwitchBtn.addEventListener('click', function(){
+    setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+  });
+
+  authForm.addEventListener('submit', async function(ev){
+    ev.preventDefault();
+    authError.style.display = 'none';
+    authNote.style.display = 'none';
+    authSubmitBtn.disabled = true;
+    var email = authEmail.value.trim();
+    var password = authPassword.value;
+    try{
+      if (authMode === 'signup'){
+        var res = await sb.auth.signUp({ email: email, password: password });
+        if (res.error) throw res.error;
+        if (!res.data.session){
+          authNote.textContent = 'נשלח אליך מייל לאישור ההרשמה. אחרי שתאשר/י, התחבר/י כאן עם אותם פרטים.';
+          authNote.style.display = 'block';
+          setAuthMode('signin');
+        }
+      } else {
+        var res2 = await sb.auth.signInWithPassword({ email: email, password: password });
+        if (res2.error) throw res2.error;
+      }
+    }catch(err){
+      authError.textContent = 'שגיאה: ' + (err && err.message ? err.message : err);
+      authError.style.display = 'block';
+    }
+    authSubmitBtn.disabled = false;
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async function(){
+    await sb.auth.signOut();
+  });
+
+  sb.auth.onAuthStateChange(function(event, session){
+    if (session && session.user) enterApp(session.user);
+    else showAuthGate();
+  });
+
+  sb.auth.getSession().then(function(res){
+    var session = res.data.session;
+    if (session && session.user) enterApp(session.user);
+    else showAuthGate();
+  });
 });
+
+async function enterApp(user){
+  currentUser = user;
+  document.getElementById('authGate').hidden = true;
+  document.getElementById('appSections').hidden = false;
+  var userBar = document.getElementById('userBar');
+  userBar.hidden = false;
+  document.getElementById('userEmailLabel').textContent = user.email;
+  try{
+    await loadRemoteState(user.id);
+    renderAll();
+  }catch(err){
+    alert('שגיאה בטעינת הנתונים מהענן: ' + (err && err.message ? err.message : err));
+  }
+}
+
+function showAuthGate(){
+  currentUser = null;
+  document.getElementById('authGate').hidden = false;
+  document.getElementById('appSections').hidden = true;
+  document.getElementById('userBar').hidden = true;
+}
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
   window.addEventListener('load', function(){

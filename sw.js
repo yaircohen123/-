@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maaser-cache-v1';
+const CACHE_NAME = 'maaser-cache-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -27,6 +27,7 @@ self.addEventListener('activate', function(event){
 
 self.addEventListener('fetch', function(event){
   if (event.request.method !== 'GET') return;
+  if (new URL(event.request.url).origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then(function(cached){
       if (cached) return cached;
